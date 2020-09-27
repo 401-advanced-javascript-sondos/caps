@@ -1,11 +1,11 @@
 'use strict';
 
-require('dotenv').config();
+// require('dotenv').config();
 const events = require('./events');
 const faker = require('faker');
 
 
-const storeName = process.env.Name;
+// const storeName = process.env.Name;
 
 events.on('order',generatOrder);
 
@@ -19,7 +19,7 @@ function generatOrder() {
     let randomAddress= faker.address.city();
 
     let order = {
-      storeName: storeName,
+      storeName: 'xax',
       orderId: randomId,
       customerName: randomName,
       address: randomAddress,
