@@ -23,7 +23,7 @@ function generatOrder() {
   setInterval(() => {
 
     //create obj
-console.log('name',storeName);
+// console.log('name',storeName);
     let randomId = faker.random.uuid();
     let randomName = faker.name.findName();
     let randomAddress = faker.address.city();
