@@ -30,7 +30,7 @@ client.on('data', buffer => {
 
 
     setTimeout(() => {
-      console.log(`DRIVER: delivered ${events.orderId}.`);
+      console.log(`DRIVER: delivered ${events.payload.orderId}.`);
       const messageObject = {
         event: 'delivered',
         payload: events.payload,

@@ -9,7 +9,7 @@ const client = new net.Socket();
 
 const host = process.env.HOST || 'localhost';
 const port = process.env.PORT || 4000;
-const storeName = (process.env.Name);
+const storeName = process.env.Name;
 
 
 client.connect(port, host, () => {
@@ -23,7 +23,7 @@ function generatOrder() {
   setInterval(() => {
 
     //create obj
-
+console.log('name',storeName);
     let randomId = faker.random.uuid();
     let randomName = faker.name.findName();
     let randomAddress = faker.address.city();
@@ -39,16 +39,21 @@ function generatOrder() {
       event: 'pickup',
       payload: order,
     };
+    console.log('obj',messageObject);
 
     let msg = JSON.stringify(messageObject);
-    console.log(msg);
+    console.log('msg',msg);
     client.write(msg);
 
   }, 5000);
 }
 
 client.on('data', buffer => {
+  // console.log('buffer vendor',buffer);
+
   let events = JSON.parse(buffer);
+  // console.log('after buffer vendor',buffer);
+
   if (events.event == 'delivered')
     console.log(`VENDOR: Thank you for delivering ${events.payload.orderId}`);
 
