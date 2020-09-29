@@ -1,57 +1,50 @@
 'use strict';
 
 require('dotenv').config();
-const net = require('net');
-const server = net.createServer();
-const uuid = require('uuid').v4;
-
-const port = process.env.PORT || 4000;
-
-//Accept inbound TCP connections on a declared port
-server.listen(port, () => console.log(`server is running on ${port}`));
+const io = require('socket.io')(process.env.PORT || 4000);
 
 
-//Creates a pool of connected clients
-let clientPool = {};
+// Create and accept connections on a namespace called caps
+// Within the namespace:
+// Monitor the ‘join’ event.
+// Each vendor will have their own “room” so that they only get their own delivery notifications
 
-//On new connections, add the client to the connection pool
-server.on('connection', (socket) => {
-    console.log('user seccessfuly connect ');
-    const id = `Socket-${uuid()}`;
-    clientPool[id] = socket;
+const caps = io.of('/caps');
 
+caps.on('connection', socket => {
+    console.log('user seccessfuly connect ', socket.id);
 
-    //Read and parse the incoming data/payload
-    //Verify that the data is legitimate
-    socket.on('data', buffer => {
-        // console.log('data/payload--------->', buffer);
-        logger(buffer);
+    socket.on('join', room => {
+        console.log('join room :', room);
+        socket.join(room);
+    });
+
+    socket.on('pickup', payload => {
+        caps.emit('pickup',payload);
+        const event='pickup';
+        const time=new Date().toLocaleTimeString();
+        console.log(event,time ,payload);
 
 
     });
 
-    socket.on('error', e => {
-        console.log('error--------->', e);
+    socket.on('in-transit', payload => {
+        caps.to(payload.room).emit('in-transit',payload);
+        const event='in-transit';
+        const time=new Date().toLocaleTimeString();
+        // console.log(event,time ,payload);
+        console.log(time , event, `in room:${payload.room}`, payload);
+
     });
 
-    socket.on('close', () => {
-        delete socket[id];
+    socket.on('delivered', payload => {
+        caps.to(payload.room).emit('delivered',payload);
+        const event='delivered';
+        const time=new Date().toLocaleTimeString();
+        console.log(time , event,`in room:${payload.room}`, payload);
     });
+
 
 });
 
-function logger(buffer) {
-    let massage = JSON.parse(buffer.toString());
-    const time = new Date();
-    console.log('msg=======>', massage, time);
-    broadcast(massage);
-}
 
-
-
-function broadcast(massage) {
-    let payload = JSON.stringify(massage);
-    for (let id in clientPool) {
-        clientPool[id].write(payload);
-    };
-};

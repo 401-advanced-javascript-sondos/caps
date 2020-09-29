@@ -1,46 +1,38 @@
 'use strict';
-
 require('dotenv').config();
-const net = require('net');
-
-const client = new net.Socket();
-
+const io = require('socket.io-client');
 const host = process.env.HOST || 'localhost';
 const port = process.env.PORT || 4000;
-
-client.connect(port, host, () => {
-  console.log(`driver app online. Successfully connected to ${host} at ${port}`);
-
-});
+const socket = io.connect(`http://${host}:${port}/caps`);
+const storeName = process.env.Name;
 
 
-client.on('data', buffer => {
-  let events = JSON.parse(buffer);
-  if (events.event == 'pickup') {
-    setTimeout(() => {
-      console.log(`DRIVER: picked up ${events.payload.orderId}.`);
-      const messageObject = {
-        event: 'in-transit',
-        payload: events.payload,
-      };
 
-      let msg = JSON.stringify(messageObject);
-      client.write(msg);
-    }, 1000);
+socket.on('pickup', payload => {
 
+  setTimeout(() => {
+    console.log(`DRIVER: picked up ${payload.orderId}.`);
 
-    setTimeout(() => {
-      console.log(`DRIVER: delivered ${events.payload.orderId}.`);
-      const messageObject = {
-        event: 'delivered',
-        payload: events.payload,
-      };
+    const messageObject = {
+      room: storeName,
+      payload: payload,
+    };
+    socket.emit('in-transit', messageObject);
 
-      let msg = JSON.stringify(messageObject);
-      client.write(msg);
-    }, 3000);
-  }
+  }, 1500);
 
 
+  setTimeout(() => {
+    console.log(`DRIVER: delivered ${payload.orderId}.`);
+    const messageObject = {
+      room: storeName,
+      payload: payload,
+    };
+
+    // let msg = JSON.stringify(messageObject);
+    // client.write(msg);
+    socket.emit('delivered', messageObject);
+
+  }, 3000);
 });
 
