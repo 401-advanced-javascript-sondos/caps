@@ -6,11 +6,11 @@ const faker = require('faker');
 const host = process.env.HOST || 'localhost';
 const port = process.env.PORT || 4000;
 const storeName = process.env.Name;
-const socket =io.connect(`http://${host}:${port}/caps`);
+const socket = io.connect(`http://${host}:${port}/caps`);
 
 
 
-socket.emit('join',storeName);
+socket.emit('join', storeName);
 
 function generatOrder() {
   setInterval(() => {
@@ -28,13 +28,13 @@ function generatOrder() {
       address: randomAddress,
     };
 
-    socket.emit('pickup',order);
+    socket.emit('pickup', order);
 
   }, 5000);
 }
 
 socket.on('delivered', payload => {
-    console.log(`VENDOR: Thank you for delivering ${payload.payload.orderId}`);
+  console.log(`VENDOR: Thank you for delivering ${payload.payload.orderId}`);
 
 });
 
@@ -42,3 +42,5 @@ socket.on('delivered', payload => {
 
 
 generatOrder();
+
+module.exports = { generatOrder: () => generatOrder() };

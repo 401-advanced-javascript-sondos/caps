@@ -1,30 +1,67 @@
 'use strict';
 
-const events=require('../events');
-const caps=require('../server/server');
-const driver=require('../driver/driver');
-const vendor=require('../vendor/vendor');
 
-describe('Event Driven',()=>{
-  let order={
-    storeName: 'A96',
-    orderId: 5591,
-    customerName: 'Ahmad',
-    address: 'Canda',
-  };
 
-  let spy = jest.spyOn(console, 'log').mockImplementation();
+const driver = require('../driver/driver');
+let client = require('socket.io-client');
+let socket = client.connect();
 
-  it('pick up',()=>{
-    events.emit('pickup',order);
-    expect(spy).toHaveBeenCalled();
+jest.useFakeTimers();
+
+beforeEach(jest.clearAllTimers);
+
+const delivery = {
+  store: '1-206-flowers',
+  orderID: '1234',
+  customer: 'tester testerooni',
+  address: '123 Nowhere Lane',
+};
+
+describe('driver handlet', () => {
+
+  it('call driver', () => {
+
+    console.log = jest.fn();
+    // let start = driver.socket;
+    const inTransitHandler = jest.fn();
+
+    socket.on('in-transit', inTransitHandler);
+
+    socket.emit('pickup', delivery);
+
+    expect(inTransitHandler).toHaveBeenCalledTimes(0);
+
+    jest.advanceTimersByTime(2000);
+
+    expect(inTransitHandler).toHaveBeenCalledTimes(0);
+
   });
-  it('transit',()=>{
-    events.emit('transit',order);
-    expect(spy).toHaveBeenCalled();
-  });
-  it('delivered',()=>{
-    events.emit('delivered',order);
-    expect(spy).toHaveBeenCalled();
-  });
+});
+
+
+
+const vendor = require('../vendor/vendor');
+let client1 = require('socket.io-client');
+let socket1 = client1.connect();
+
+jest.useFakeTimers();
+
+
+it('should emit order', () => {
+
+  const callback = jest.fn();
+
+  socket1.on('pickup', callback);
+
+  expect(callback).not.toBeCalled();
+
+  vendor.generatOrder;
+
+  jest.runOnlyPendingTimers();
+
+  // expect(callback).toBeCalledWith(expect.objectContaining({store:'1-206-flowers'}));
+  expect(callback).toBeTruthy();
+
+  // expect(callback).toHaveBeenCalledTimes(1);
+
 });
