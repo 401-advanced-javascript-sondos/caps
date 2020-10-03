@@ -16,3 +16,6 @@ A real-time service that allows for vendors, such as flower shops or restaurants
 
 ## UML
 ![img](assest/event.png)
+
+## UML2
+![img](assest/umlCaps.png)

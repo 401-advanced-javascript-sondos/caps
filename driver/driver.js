@@ -36,3 +36,5 @@ socket.on('pickup', payload => {
   }, 3000);
 });
 
+module.exports = socket;
+
